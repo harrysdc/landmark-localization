@@ -51,7 +51,8 @@ class PF:
         PF needs no jacobian
         '''
         for i in range(self.n):
-            u = u + rng.standard_normal(3)
+            noise = self.M(u).diagonal() * rng.standard_normal(3)
+            u += noise
             self.particles[:, i] = self.gfun(self.particles[:, i], u)
         
         ###############################################################################
@@ -74,18 +75,21 @@ class PF:
         #       landmark, and landmark1.getPosition()[1] to get its y position        #
         ###############################################################################
         
-        def likelihood(self, z, x, landmark1, landmark2):
+        def likelihood(z, x, landmark1, landmark2):
             '''
             z -- (6, ) each half is [bearing, range, landmark_id]
             x -- robot state (3, )
             '''
             # compute expected bearing and range to landmark1 and landmark2 for a particle
-            expected_z1 = self.hfun(landmark1.getPosition()[0], landmark1.getPosition()[1], x)
-            expected_z2 = self.hfun(landmark2.getPosition()[0], landmark2.getPosition()[1], x)
+            z1_diff = z[0:2] - self.hfun(landmark1.getPosition()[0], landmark1.getPosition()[1], x)
+            z2_diff = z[3:5] - self.hfun(landmark2.getPosition()[0], landmark2.getPosition()[1], x)
+
+            z1_diff[1] = wrap2Pi(z1_diff[1])
+            z2_diff[1] = wrap2Pi(z2_diff[1])
 
             # compute the likelihood of the measurements for each particle
-            likelihoods1 = multivariate_normal.pdf(z[0:2], mean=expected_z1, cov=self.Q)
-            likelihoods2 = multivariate_normal.pdf(z[3:5], mean=expected_z2, cov=self.Q)
+            likelihoods1 = multivariate_normal.pdf(z1_diff, mean=np.zeros(2), cov=self.Q)
+            likelihoods2 = multivariate_normal.pdf(z2_diff, mean=np.zeros(2), cov=self.Q)
             likelihoods = likelihoods1 * likelihoods2
 
             return likelihoods
