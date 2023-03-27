@@ -40,7 +40,8 @@ class EKF:
         # TODO: Implement the prediction step for EKF                                 #
         # Hint: save your predicted state and cov as X_pred and P_pred                #
         ###############################################################################
-        
+        X_pred = self.gfun(X, u)
+        P_pred = self.Gfun(X,u) @ P @ self.Gfun(X,u) + self.Vfun(X,u) @ self.M @ self.Vfun(X,u)
 
         ###############################################################################
         #                         END OF YOUR CODE                                    #
@@ -57,7 +58,7 @@ class EKF:
         # Inputs:
         #   z:  measurement
         X_predict = self.state_.getState()
-        P_predict = self.state_.getCovariance()
+        P_predict = self.state_.getCovariance() # (3,3)
         
         landmark1 = landmarks.getLandmark(z[2].astype(int))
         landmark2 = landmarks.getLandmark(z[5].astype(int))
@@ -68,6 +69,13 @@ class EKF:
         # Hint: you can use landmark1.getPosition()[0] to get the x position of 1st   #
         #       landmark, and landmark1.getPosition()[1] to get its y position        #
         ###############################################################################
+
+        H = self.Hfun(landmark1.getPosition()[0], landmark1.getPosition()[1], X_predict, z_hat)
+        K = P_predict @ H.T @ (H@P_predict@H + self.Q)
+
+        X = X + K @ (z)
+        P = 
+
 
         
         ###############################################################################
