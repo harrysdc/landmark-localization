@@ -25,6 +25,9 @@ def Gfun(mu,u):
     return output
 
 def Vfun(mu,u):
+    '''
+    jocobian of motion model dX_k+1/dnoise
+    '''
     output = np.array([[np.sin(mu[2]+u[1])/u[1]-np.sin(mu[2])/u[1], (u[0]*np.cos(mu[2]+u[1]))/u[1]-(u[0]*np.sin(mu[2]+u[1]))/(u[1]**2)+(u[0]*np.sin(mu[2]))/(u[1]**2), 0],\
                        [np.cos(mu[2])/u[1]-np.cos(mu[2]+u[1])/u[1], (u[0]*np.cos(mu[2]+u[1]))/(u[1]**2)+(u[0]*np.sin(mu[2]+u[1]))/u[1]-(u[0]*np.cos(mu[2]))/(u[1]**2), 0],\
                        [0,                                          1,                                                                                             1]])
