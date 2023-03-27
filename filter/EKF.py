@@ -41,7 +41,9 @@ class EKF:
         # Hint: save your predicted state and cov as X_pred and P_pred                #
         ###############################################################################
         X_pred = self.gfun(X, u)
-        P_pred = self.Gfun(X,u) @ P @ self.Gfun(X,u) + self.Vfun(X,u) @ self.M @ self.Vfun(X,u)
+        G = self.Gfun(X, u) # (3, 3)
+        V = self.Vfun(X, u)# (3, 3)
+        P_pred = G @ P @ G.T + V @ self.M(u) @ V.T
 
         ###############################################################################
         #                         END OF YOUR CODE                                    #
@@ -69,14 +71,20 @@ class EKF:
         # Hint: you can use landmark1.getPosition()[0] to get the x position of 1st   #
         #       landmark, and landmark1.getPosition()[1] to get its y position        #
         ###############################################################################
+        def correct(z, lm, X_predict, P_predict):
+            z1_expected = self.hfun(lm.getPosition()[0], lm.getPosition()[1], X_predict)
+            z1_diff = z - z1_expected
+            z1_diff[1] = wrap2Pi(z1_diff[1])
 
-        H = self.Hfun(landmark1.getPosition()[0], landmark1.getPosition()[1], X_predict, z_hat)
-        K = P_predict @ H.T @ (H@P_predict@H + self.Q)
-
-        X = X + K @ (z)
-        P = 
-
-
+            H = self.Hfun(lm.getPosition()[0], lm.getPosition()[1], X_predict, z1_expected)
+            K = P_predict @ H.T @ np.linalg.inv(H@P_predict@H.T + self.Q)
+            
+            X = X_predict + K @ z1_diff
+            P = (np.eye(3)- K@H) @ P_predict
+            return X, P
+        
+        X_predict, P_predict = correct(z[0:2], landmark1, X_predict, P_predict)
+        X, P = correct(z[3:5], landmark2, X_predict, P_predict)
         
         ###############################################################################
         #                         END OF YOUR CODE                                    #
