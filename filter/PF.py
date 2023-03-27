@@ -73,33 +73,21 @@ class PF:
         # Hint: you can use landmark1.getPosition()[0] to get the x position of 1st   #
         #       landmark, and landmark1.getPosition()[1] to get its y position        #
         ###############################################################################
+        
         def likelihood(self, z, x, landmark1, landmark2):
             '''
             z -- (6, ) each half is [bearing, range, landmark_id]
             x -- robot state (3, )
             '''
-            bearing1, range1, _ = z[:3]
-            bearing2, range2, _ = z[3:]
-
-            lm1_x = landmark1.getPosition()[0]
-            lm1_y = landmark1.getPosition()[1]
-            lm2_x = landmark2.getPosition()[0]
-            lm2_y = landmark2.getPosition()[1]
-
-            par_x = x[0]
-            par_y = x[1]
-            par_t = x[2]
-
             # compute expected bearing and range to landmark1 and landmark2 for a particle
-            expected_bearing1 = np.arctan2(lm1_y-par_y, lm1_x-par_x) - par_t
-            expected_range1 = np.sqrt((lm1_x-par_x)**2 + (lm1_y-par_y)**2)
-            expected_bearing2 = np.arctan2(lm2_y - par_y, lm2_x - par_x) - par_t
-            expected_range2 = np.sqrt((lm2_x-par_x)**2 + (lm2_y-par_y)**2)
+            expected_z1 = self.hfun(landmark1.getPosition()[0], landmark1.getPosition()[1], x)
+            expected_z2 = self.hfun(landmark2.getPosition()[0], landmark2.getPosition()[1], x)
 
             # compute the likelihood of the measurements for each particle
-            likelihoods1 = multivariate_normal.pdf([bearing1, range1], mean=[expected_bearing1, expected_range1], cov=self.Q)
-            likelihoods2 = multivariate_normal.pdf([bearing2, range2], mean=[expected_bearing2, expected_range2], cov=self.Q)
+            likelihoods1 = multivariate_normal.pdf(z[0:2], mean=expected_z1, cov=self.Q)
+            likelihoods2 = multivariate_normal.pdf(z[3:5], mean=expected_z2, cov=self.Q)
             likelihoods = likelihoods1 * likelihoods2
+
             return likelihoods
 
 
