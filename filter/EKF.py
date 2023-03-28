@@ -72,14 +72,14 @@ class EKF:
         #       landmark, and landmark1.getPosition()[1] to get its y position        #
         ###############################################################################
         def correct(z, lm, X_predict, P_predict):
-            z1_expected = self.hfun(lm.getPosition()[0], lm.getPosition()[1], X_predict)
-            z1_diff = z - z1_expected
-            z1_diff[1] = wrap2Pi(z1_diff[1])
+            z_expected = self.hfun(lm.getPosition()[0], lm.getPosition()[1], X_predict)
+            z_diff = z - z_expected
+            z_diff[1] = wrap2Pi(z_diff[1])
 
-            H = self.Hfun(lm.getPosition()[0], lm.getPosition()[1], X_predict, z1_expected)
-            K = P_predict @ H.T @ np.linalg.inv(H@P_predict@H.T + self.Q)
+            H = self.Hfun(lm.getPosition()[0], lm.getPosition()[1], X_predict, z_expected)
+            K = P_predict @ H.T @ np.linalg.pinv(H@P_predict@H.T + self.Q)
             
-            X = X_predict + K @ z1_diff
+            X = X_predict + K @ z_diff
             P = (np.eye(3)- K@H) @ P_predict
             return X, P
         
