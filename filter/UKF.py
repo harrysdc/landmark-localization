@@ -76,6 +76,8 @@ class UKF:
         #       landmark, and landmark1.getPosition()[1] to get its y position        #
         ###############################################################################
         def correct(z, lm, X_predict, P_predict):
+            self.sigma_point(X_predict.reshape((3,1)), P_predict, self.kappa_g)
+            
             z_expected = np.zeros((2,7))
             for i in range(2*self.n+1): 
                 z_expected[:, i] = self.hfun(lm.getPosition()[0], lm.getPosition()[1], self.X[:, i])
@@ -95,7 +97,7 @@ class UKF:
             X = X.squeeze()
             return X, P
 
-        #X_predict, P_predict = correct(z[0:2], landmark1, X_predict, P_predict)
+        X_predict, P_predict = correct(z[0:2], landmark1, X_predict, P_predict)
         X, P = correct(z[3:5], landmark2, X_predict.reshape((3,1)), P_predict)
 
         ###############################################################################
