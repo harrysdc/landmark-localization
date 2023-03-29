@@ -32,11 +32,11 @@ class InEKF:
         self.W = system.W # motion noise covariance
         self.V = system.V # measurement noise covariance
         
-        self.mu = init.mu
-        self.Sigma = init.Sigma
+        self.mu = init.mu # (3, 3)
+        self.Sigma = init.Sigma # (3, 3)
 
         self.state_ = RobotState()
-        X = np.array([self.mu[0,2], self.mu[1,2], np.arctan2(self.mu[1,0], self.mu[0,0])])
+        X = np.array([self.mu[0,2], self.mu[1,2], np.arctan2(self.mu[1,0], self.mu[0,0])]) # (3,)
         self.state_.setState(X)
         self.state_.setCovariance(init.Sigma)
 
@@ -47,7 +47,7 @@ class InEKF:
         state_vector[1] = self.mu[1,2]
         state_vector[2] = np.arctan2(self.mu[1,0], self.mu[0,0])
         H_prev = self.pose_mat(state_vector)
-        state_pred = self.gfun(state_vector, u)
+        state_pred = self.gfun(state_vector, u) # (3,)
         H_pred = self.pose_mat(state_pred)
 
         u_se2 = logm(np.linalg.inv(H_prev) @ H_pred)
@@ -55,7 +55,10 @@ class InEKF:
         ###############################################################################
         # TODO: Propagate mean and covairance (You need to compute adjoint AdjX)      #
         ###############################################################################
-        
+        # init 3x3 adjoint function for propagating covariance
+        adjX = np.vstack(
+            (np.hstack((self.mu[0:2, 0:2], [[self.mu[1, 2]], [-self.mu[0, 2]]])), 
+                    [0, 0, 1]))
 
         ###############################################################################
         #                         END OF YOUR CODE                                    #
@@ -69,7 +72,8 @@ class InEKF:
         # Hint: you can save predicted state and cov as self.X_pred and self.P_pred   #
         #       and use them in the correction function                               #
         ###############################################################################
-        pass
+        self.X_pred = self.mu @ expm(u) # (3, 3)
+        self.P_pred =  self.Sigma + adjX @ self.W @ adjX.T # (3, 3)
 
         ###############################################################################
         #                         END OF YOUR CODE                                    #
@@ -85,8 +89,31 @@ class InEKF:
         # Hint: you can use landmark1.getPosition()[0] to get the x position of 1st   #
         #       landmark, and landmark1.getPosition()[1] to get its y position        #
         ###############################################################################
+        lm1_x = landmark1.getPosition()[0]
+        lm1_y = landmark1.getPosition()[1]
+        lm2_x = landmark2.getPosition()[0]
+        lm2_y = landmark2.getPosition()[1]
+        H1 = np.array([[lm1_y, -1, 0], [-lm1_x, 0, -1]])
+        H2 = np.array([[lm2_y, -1, 0], [-lm2_x, 0, -1]])
+        H = np.vstack((H1, H2)) # (4, 3)
 
-        
+        N = self.X_pred @ np.diag([100,100,0]) @ self.X_pred.T
+        N = N[0:2, 0:2]
+        N_large = block_diag(N, N) # (4,4)
+        S = H @ self.P_pred @ H.T + N_large
+        L = self.P_pred @ H.T @ np.linalg.inv(S) # (3, 4)
+
+        eta1 = self.X_pred @ Y1.reshape((3,1)) - np.array([[lm1_x], [lm1_y], [1]])
+        eta2 = self.X_pred @ Y2.reshape((3,1)) - np.array([[lm2_x], [lm2_y], [1]])
+        eta = np.vstack((eta1[0:2], eta2[0:2]))
+
+        twist = (L @ eta).squeeze() # (3, 1)
+        twist_hat = np.array([[0, -twist[2], twist[0]], [twist[2], 0, twist[1]], [0,0,0]])
+
+        X = expm(twist_hat) @ self.X_pred # (3,3) -> (3,)
+
+        self.Sigma = (np.eye(3)-L@H) @ self.P_pred @ (np.eye(3)-L@H).T + L @ N_large @ L.T # (3,3)
+
         ###############################################################################
         #                         END OF YOUR CODE                                    #
         ###############################################################################
