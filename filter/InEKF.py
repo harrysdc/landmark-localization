@@ -56,9 +56,8 @@ class InEKF:
         # TODO: Propagate mean and covairance (You need to compute adjoint AdjX)      #
         ###############################################################################
         # init 3x3 adjoint function for propagating covariance
-        adjX = np.vstack(
-            (np.hstack((self.mu[0:2, 0:2], [[self.mu[1, 2]], [-self.mu[0, 2]]])), 
-                    [0, 0, 1]))
+        adjX = np.hstack((self.mu[0:2, 0:2], np.array([[self.mu[1, 2]], [-self.mu[0, 2]]])))
+        adjX = np.vstack((adjX, np.array([0,0,1])))
 
         ###############################################################################
         #                         END OF YOUR CODE                                    #
@@ -97,22 +96,21 @@ class InEKF:
         H2 = np.array([[lm2_y, -1, 0], [-lm2_x, 0, -1]])
         H = np.vstack((H1, H2)) # (4, 3)
 
-        N = self.X_pred @ np.diag([100,100,0]) @ self.X_pred.T
+        N = self.X_pred @ np.diag([100000,100000,0]) @ self.X_pred.T
         N = N[0:2, 0:2]
-        N_large = block_diag(N, N) # (4,4)
-        S = H @ self.P_pred @ H.T + N_large
+        S = H @ self.P_pred @ H.T + block_diag(N, N) # (4,4)
         L = self.P_pred @ H.T @ np.linalg.inv(S) # (3, 4)
 
         eta1 = self.X_pred @ Y1.reshape((3,1)) - np.array([[lm1_x], [lm1_y], [1]])
         eta2 = self.X_pred @ Y2.reshape((3,1)) - np.array([[lm2_x], [lm2_y], [1]])
-        eta = np.vstack((eta1[0:2], eta2[0:2]))
+        eta = np.squeeze(np.vstack((eta1[0:2], eta2[0:2])))
 
-        twist = (L @ eta).squeeze() # (3, 1)
-        twist_hat = np.array([[0, -twist[2], twist[0]], [twist[2], 0, twist[1]], [0,0,0]])
+        twist = L @ eta # (3,)
+        twist_hat = self.wedge(twist)
 
-        X = expm(twist_hat) @ self.X_pred # (3,3) -> (3,)
-
-        self.Sigma = (np.eye(3)-L@H) @ self.P_pred @ (np.eye(3)-L@H).T + L @ N_large @ L.T # (3,3)
+        self.mu = expm(twist_hat) @ self.X_pred
+        X = np.array([self.mu[0,2], self.mu[1,2], np.arctan2(self.mu[1,0], self.mu[0,0])])
+        self.Sigma = (np.eye(3)-L@H) @ self.P_pred @ (np.eye(3)-L@H).T + L @ block_diag(N, N) @ L.T # (3,3)
 
         ###############################################################################
         #                         END OF YOUR CODE                                    #
@@ -136,3 +134,11 @@ class InEKF:
                       [np.sin(h),np.cos(h),y],\
                       [0,0,1]])
         return H
+    
+    def wedge(self, X):
+        # wedge operation for se(2) to put an R^3 vector to the Lie algebra basis        
+        G1=np.array([[0,-1,0],[1,0,0],[0,0,0]])# omega        
+        G2=np.array([[0,0,1],[0,0,0],[0,0,0]]) # v_1
+        G3=np.array([[0,0,0],[0,0,1],[0,0,0]]) # v_2
+        x_hat = G1 * X[0] + G2 *X[1] + G3 * X[2]
+        return x_hat
