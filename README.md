@@ -25,9 +25,7 @@ A dummy filter is provided to test if environment is set up correctly.
 
 ## Configurations
 Parameters can be modified in `config/settings.yaml`.
-
 * `filter_name`: The filter you would like to run. Options include: `EKF`,`UKF`, `PF`, `InEKF`, and `test`.
-* `Lie2Cart`: Set to `True` if you finish implementing the extra points question 2.E.
 
 
 ## Results
