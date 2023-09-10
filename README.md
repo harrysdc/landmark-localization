@@ -5,7 +5,7 @@
 * ROS Noetic
 
 ### Python Packages
-These packages are required. pip install $package name$.
+These packages are required.
 * [NumPy](https://numpy.org/)
 * [SciPy](https://scipy.org/)
 * [PyYAML](https://pypi.org/project/PyYAML/)
