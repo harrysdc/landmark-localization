@@ -1,17 +1,16 @@
 # Landmark Localization
 
-## Dependencies
+### Dependencies
 * Ubuntu 20.04
 * ROS Noetic
 
 ### Python Packages
-These packages are required.
 * [NumPy](https://numpy.org/)
 * [SciPy](https://scipy.org/)
 * [PyYAML](https://pypi.org/project/PyYAML/)
 * [Matplotlib](https://pypi.org/project/matplotlib/)
 
----
+
 ## Setup Testing
 A dummy filter is provided to test if environment is set up correctly.
 1. Open a terminal, run ```roscore```.
@@ -23,14 +22,14 @@ A dummy filter is provided to test if environment is set up correctly.
 <!-- 
 **Note:** We include a dummy filter in the code, which allows you to test if you have set up your environment correctly. To run the dummy filter, set `filter_name` to `test` in `config/settings.yaml` and do `python3 run.py`. -->
 
----
+
 ### Configurations
 Parameters can be modified in `config/settings.yaml`.
 
 * `filter_name`: The filter you would like to run. Options include: `EKF`,`UKF`, `PF`, `InEKF`, and `test`.
 * `Lie2Cart`: Set to `True` if you finish implementing the extra points question 2.E.
 
----
+
 ### Results
 ![setup](img/result-ekf.gif)
 * `green path` represents command path without action noise
