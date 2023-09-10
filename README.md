@@ -22,30 +22,26 @@ A dummy filter is provided to test if environment is set up correctly.
 6. You should be able to see your a robot moving in `rviz`.
 <!-- 
 **Note:** We include a dummy filter in the code, which allows you to test if you have set up your environment correctly. To run the dummy filter, set `filter_name` to `test` in `config/settings.yaml` and do `python3 run.py`. -->
-You should expect to see the visualization shown below. In this figure, `green path` represents command path without action noise, which is the path we want our robot to follow. `blue path` represents the exact path that the robot moves due to action noise. The `red ellipse` and the `red arrow` represent the filter prediction pose for the robot.
+You should expect to see the visualization shown below. 
 
 ![setup](img/result-ekf.gif)
 ---
 ### Configurations
 Parameters can be modified in `config/settings.yaml`.
 
-**You will only need to modify** `filter_name` **and** `Lie2Cart`.
-
 * `filter_name`: The filter you would like to run. Options include: `EKF`,`UKF`, `PF`, `InEKF`, and `test`.
 * `Lie2Cart`: Set to `True` if you finish implementing the extra points question 2.E.
 
 ---
-### Files you need to implement
-* Implement all four filters. 
-  * `filter/EKF.py`
-  * `filter/UKF.py`
-  * `filter/PF.py`
-  * `filter/InEKF.py`
-<!-- --- -->
-<!-- ## Visualization
-We set up the visualization in rviz for you. To visualize the results in rviz, please follow the below steps:
+### Results
+* `green path` represents command path without action noise
+* `blue path` represents the exact path that the robot moves due to action noise
+* `red ellipse` represents the robot pose
+* `red arrow` represent the covariance
 
-1. In one terminal, open rviz.
+---
+### Visualization
+1. open rviz in a terminal
 2. In rviz, click `file` -> `open config`.
 3. Choose `rviz/default.rviz` in the homework folder.
 4. Open a new terminal, run your filter. You should be able to see a visualization of the filter. -->
