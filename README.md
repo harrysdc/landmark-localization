@@ -36,7 +36,7 @@ Parameters can be modified in `config/settings.yaml`.
 * `green path` represents command path without action noise
 * `blue path` represents the exact path that the robot moves due to action noise
 * `red ellipse` represents the robot pose
-* `red arrow` represent the covariance
+* `red arrow` represents the covariance
 
 
 ### Visualization
