@@ -24,7 +24,7 @@ A dummy filter is provided to test if environment is set up correctly.
 **Note:** We include a dummy filter in the code, which allows you to test if you have set up your environment correctly. To run the dummy filter, set `filter_name` to `test` in `config/settings.yaml` and do `python3 run.py`. -->
 You should expect to see the visualization shown below. In this figure, `green path` represents command path without action noise, which is the path we want our robot to follow. `blue path` represents the exact path that the robot moves due to action noise. The `red ellipse` and the `red arrow` represent the filter prediction pose for the robot.
 
-![setup](img/setup.png)
+![setup](img/result-ekf.mp4)
 ---
 ### Configurations
 Parameters can be modified in `config/settings.yaml`.
