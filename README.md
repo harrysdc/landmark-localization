@@ -22,9 +22,7 @@ A dummy filter is provided to test if environment is set up correctly.
 6. You should be able to see your a robot moving in `rviz`.
 <!-- 
 **Note:** We include a dummy filter in the code, which allows you to test if you have set up your environment correctly. To run the dummy filter, set `filter_name` to `test` in `config/settings.yaml` and do `python3 run.py`. -->
-You should expect to see the visualization shown below. 
 
-![setup](img/result-ekf.gif)
 ---
 ### Configurations
 Parameters can be modified in `config/settings.yaml`.
@@ -34,12 +32,13 @@ Parameters can be modified in `config/settings.yaml`.
 
 ---
 ### Results
+![setup](img/result-ekf.gif)
 * `green path` represents command path without action noise
 * `blue path` represents the exact path that the robot moves due to action noise
 * `red ellipse` represents the robot pose
 * `red arrow` represent the covariance
 
----
+
 ### Visualization
 1. open rviz in a terminal
 2. In rviz, click `file` -> `open config`.
