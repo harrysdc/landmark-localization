@@ -3,8 +3,6 @@
 ## Dependencies
 * Ubuntu 20.04
 * ROS Noetic
-  * You can find the detailed installation instructions on [ROS Wiki](http://wiki.ros.org/ROS/Installation).
-  * If you're unable to visualize the robot in rviz, try disabling 3D acceleration in your virtual machine setting.
 
 ### Python Packages
 These packages are required. You can install them by typing `pip install $package name$`.
