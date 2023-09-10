@@ -1,10 +1,10 @@
 # Landmark Localization
 
-### Dependencies
+## Dependencies
 * Ubuntu 20.04
 * ROS Noetic
 
-### Python Packages
+## Python Packages
 * [NumPy](https://numpy.org/)
 * [SciPy](https://scipy.org/)
 * [PyYAML](https://pypi.org/project/PyYAML/)
@@ -23,14 +23,14 @@ A dummy filter is provided to test if environment is set up correctly.
 **Note:** We include a dummy filter in the code, which allows you to test if you have set up your environment correctly. To run the dummy filter, set `filter_name` to `test` in `config/settings.yaml` and do `python3 run.py`. -->
 
 
-### Configurations
+## Configurations
 Parameters can be modified in `config/settings.yaml`.
 
 * `filter_name`: The filter you would like to run. Options include: `EKF`,`UKF`, `PF`, `InEKF`, and `test`.
 * `Lie2Cart`: Set to `True` if you finish implementing the extra points question 2.E.
 
 
-### Results
+## Results
 <img src="img/result-ekf.gif" width="100%" height="100%"/>
 
 * `green path` represents command path without action noise
@@ -39,7 +39,7 @@ Parameters can be modified in `config/settings.yaml`.
 * `red arrow` represents the covariance
 
 
-### Visualization
+## Visualization
 1. open rviz in a terminal
 2. In rviz, click `file` -> `open config`.
 3. Choose `rviz/default.rviz` in the homework folder.
