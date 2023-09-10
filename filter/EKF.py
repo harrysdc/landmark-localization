@@ -38,7 +38,7 @@ class EKF:
 
         X_pred = self.gfun(X, u)
         G = self.Gfun(X, u) # (3, 3)
-        V = self.Vfun(X, u)# (3, 3)
+        V = self.Vfun(X, u) # (3, 3)
         P_pred = G @ P @ G.T + V @ self.M(u) @ V.T
 
         # Set state in RobotState()
