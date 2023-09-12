@@ -41,5 +41,5 @@ Parameters can be modified in `config/settings.yaml`.
 ## Visualization
 1. open rviz in a terminal
 2. In rviz, click `file` -> `open config`.
-3. Choose `rviz/default.rviz` in the homework folder.
+3. Choose `rviz/default.rviz`.
 4. Open a new terminal and run your filter.
