@@ -8,7 +8,6 @@ from system.RobotState import RobotState
 from utils.Landmark import LandmarkList
 from utils.utils import wrap2Pi, unscented_propagate
 
-
 class UKF:
     # UKF construct an instance of this class
     #
@@ -21,7 +20,6 @@ class UKF:
         self.hfun = system.hfun  # measurement model
         self.M = system.M # covariance of motion noise 
         self.Q = system.Q # covariance of measurement noise
-        
         self.kappa_g = init.kappa_g
         
         self.state_ = RobotState()
@@ -33,25 +31,22 @@ class UKF:
         # TODO: Implement the prediction step for UKF                                 #
         # Hint: save your predicted state and cov as X_pred and P_pred                #
         ###############################################################################
-        # prior belief
         X = self.state_.getState() # (3, )
         P = self.state_.getCovariance() # (3, 3)
 
         self.kappa_g = 0
         self.sigma_point(X.reshape((3,1)), P, self.kappa_g)
-        
+
+        # propagate sigma points
         for i in range(2 * self.n+1):
             self.X[:, i] = self.gfun(self.X[:, i], u)
+
+        # predict the next state and update covariance
         X_pred = np.zeros_like(self.X)
         X_pred = np.sum(self.w * self.X, axis=1, keepdims=True) # (3, 1)
-
         X_diff = self.X - X_pred # (3, 7)
         P_pred = (self.w * X_diff) @ X_diff.T + self.M(u)
         
-        ###############################################################################
-        #                         END OF YOUR CODE                                    #
-        ###############################################################################
-
         self.state_.setTime(rospy.Time.now())
         self.state_.setState(X_pred)
         self.state_.setCovariance(P_pred)
@@ -69,37 +64,30 @@ class UKF:
         landmark1 = landmarks.getLandmark(z[2].astype(int))
         landmark2 = landmarks.getLandmark(z[5].astype(int))
 
-        def correct(z, lm, X_predict, P_predict):
-            self.sigma_point(X_predict.reshape((3,1)), P_predict, self.kappa_g)
-            
-            z_expected = np.zeros((2,7))
-            for i in range(2*self.n+1): 
-                z_expected[:, i] = self.hfun(lm.getPosition()[0], lm.getPosition()[1], self.X[:, i])
-                z_expected[1, i] = wrap2Pi(z_expected[1, i])
+        Z = np.zeros((4, 2 * self.n + 1))
+        z_hat = np.zeros((4, 1))
+        for i in range(Z.shape[1]):
+            Z[:2, i] = self.hfun(landmark1.getPosition()[0], landmark1.getPosition()[1], self.X[:, i])
+            Z[2:, i] = self.hfun(landmark2.getPosition()[0], landmark2.getPosition()[1], self.X[:, i])
+            z_hat += self.w[i] * Z[:,i].reshape(-1,1)
+        
+        # kalman gain
+        P = (Z - z_hat) @ np.diag(self.w) @ (Z - z_hat).T + block_diag(self.Q, self.Q)
+        cross_cov = (self.Y - X_predict) @ np.diag(self.w) @ (Z - z_hat).T
+        K = cross_cov @ np.linalg.inv(P)
 
-            z_mean = np.sum(self.w * z_expected, axis=1, keepdims=True)
-            z_mean[1] = wrap2Pi(z_mean[1])
-            z_diff = z_expected - z_mean
-            cov_z = (self.w * z_diff) @ z_diff.T + self.Q # (2, 2)
-
-            X_diff = self.X - X_predict
-            crossCov = (self.w * X_diff) @ z_diff.T # (3, 2)
-            K = crossCov @ np.linalg.inv(cov_z) # (3, 2)
-
-            X = X_predict + K @ (z.reshape((2,1)) - z_mean)
-            P = P_predict - K @ cov_z @ K.T
-            X = X.squeeze()
-            return X, P
-
-        X_predict, P_predict = correct(z[0:2], landmark1, X_predict, P_predict)
-        X, P = correct(z[3:5], landmark2, X_predict.reshape((3,1)), P_predict)
-
-        ###############################################################################
-        #                         END OF YOUR CODE                                    #
-        ###############################################################################
+        # correct state and variance
+        diff = [
+            wrap2Pi(z[0] - z_hat[0]),
+            z[1] - z_hat[1],
+            wrap2Pi(z[3] - z_hat[2]),
+            z[4] - z_hat[3]]
+        X = X_predict + K @ diff
+        X[2] = wrap2Pi(X[2])
+        P = P_predict - K @ P @ K.T
 
         self.state_.setTime(rospy.Time.now())
-        self.state_.setState(X)
+        self.state_.setState(X.reshape(3))
         self.state_.setCovariance(P)
 
     def sigma_point(self, mean, cov, kappa):
