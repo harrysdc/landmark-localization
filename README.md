@@ -11,7 +11,7 @@
 * [Matplotlib](https://pypi.org/project/matplotlib/)
 
 
-## Setup Testing
+## Setup
 A dummy filter is provided to test if environment is set up correctly.
 1. Open a terminal, run ```roscore```.
 2. Check `config/settings.yaml`, ensure the `filter_name` is set to `test`.
