@@ -73,7 +73,7 @@ class UKF:
         
         # kalman gain
         P = (Z - z_hat) @ np.diag(self.w) @ (Z - z_hat).T + block_diag(self.Q, self.Q)
-        cross_cov = (self.Y - X_predict) @ np.diag(self.w) @ (Z - z_hat).T
+        cross_cov = (self.X - X_predict) @ np.diag(self.w) @ (Z - z_hat).T
         K = cross_cov @ np.linalg.inv(P)
 
         # correct state and variance
